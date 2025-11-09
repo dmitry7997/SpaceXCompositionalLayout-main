@@ -12,7 +12,7 @@ class RocketStages: UICollectionViewCell {
             label.textColor = .white
             label.textAlignment = .left
             label.text = "ПЕРВАЯ СТУПЕНЬ"
-            label.font = .systemFont(ofSize: 22, weight: .bold)
+            label.font = .systemFont(ofSize: 18, weight: .bold)
             label.numberOfLines = 1
             return label
         }()
@@ -31,6 +31,8 @@ class RocketStages: UICollectionViewCell {
             stack.axis = .vertical
             stack.spacing = 12
             stack.alignment = .leading
+            stack.alignment = .fill
+            stack.distribution = .fill
             return stack
         }()
         
@@ -38,6 +40,7 @@ class RocketStages: UICollectionViewCell {
             let label = UILabel()
             label.text = "Количество двигателей:"
             label.textColor = .lightGray
+            label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
             label.numberOfLines = 1
             label.textAlignment = .left
             return label
@@ -47,6 +50,7 @@ class RocketStages: UICollectionViewCell {
             let label = UILabel()
             label.text = "Количество топлива:"
             label.textColor = .lightGray
+            label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
             label.numberOfLines = 1
             label.textAlignment = .left
             return label
@@ -56,6 +60,7 @@ class RocketStages: UICollectionViewCell {
             let label = UILabel()
             label.text = "Время сгорания в секундах:"
             label.textColor = .lightGray
+            label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
             label.numberOfLines = 1
             label.textAlignment = .left
             return label
@@ -65,6 +70,7 @@ class RocketStages: UICollectionViewCell {
             let label = UILabel()
             label.text = "9"
             label.textColor = .white
+            label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
             label.numberOfLines = 1
             label.textAlignment = .right
             return label
@@ -73,6 +79,7 @@ class RocketStages: UICollectionViewCell {
         private let fuelValueLabel: UILabel = {
             let label = UILabel()
             label.text = "385"
+            label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
             label.textColor = .white
             label.numberOfLines = 1
             label.textAlignment = .right
@@ -82,6 +89,7 @@ class RocketStages: UICollectionViewCell {
         private let burningValueLabel: UILabel = {
             let label = UILabel()
             label.text = "1"
+            label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
             label.textColor = .white
             label.numberOfLines = 1
             label.textAlignment = .right
@@ -151,18 +159,11 @@ class RocketStages: UICollectionViewCell {
         burningRow.translatesAutoresizingMaskIntoConstraints = false
         detailsStackView.translatesAutoresizingMaskIntoConstraints = false
         
-        engineLabel.translatesAutoresizingMaskIntoConstraints = false
-        engineValueLabel.translatesAutoresizingMaskIntoConstraints = false
-        fuelLabel.translatesAutoresizingMaskIntoConstraints = false
-        fuelValueLabel.translatesAutoresizingMaskIntoConstraints = false
-        burningTime.translatesAutoresizingMaskIntoConstraints = false
-        burningValueLabel.translatesAutoresizingMaskIntoConstraints = false
-
         NSLayoutConstraint.activate([
-            mainStackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            mainStackView.topAnchor.constraint(equalTo: titleLabel.topAnchor, constant: 16),
             mainStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             mainStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            mainStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
+            mainStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
         ])
     }
     
