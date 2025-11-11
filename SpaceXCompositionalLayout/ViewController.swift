@@ -9,13 +9,27 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     
     enum Section {
         case header
-        case title //  для названия и настроек
-        case carousel // для горизонтального скрола
-        case info // for info
-        case stage // для ступеней
+        case title
+        case carousel
+        case info
+        case stage
         case footer
     }
     
+    private let service: RocketService
+    
+    init(rocketService: RocketService) {
+        self.service = rocketService
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        self.service = RocketService()
+        super.init(coder: coder)
+    }
+    
+    private var rockets: [Rocket] = []
+
     var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
     var collectionView: UICollectionView! = nil
     
@@ -51,6 +65,16 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         super.viewDidLoad()
         configureHierarchy()
         configureDataSource()
+        
+        service.getItemData { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let items):
+                self.rockets = items
+            case .failure(let error):
+                print("\(error.localizedDescription)")
+            }
+        }
     }
     
     func configureHierarchy() {
@@ -63,7 +87,7 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         collectionView.delegate = self
     }
     
-    func configureDataSource() { // здесь регаем разные типы ячеек для разных секций
+    func configureDataSource() {
         
         let carouselCount = params.count
         let infoCount = rocketParams.count
@@ -73,10 +97,13 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             headerView.configure(with: "falconHeavyImage")
         }
         
-        let titleRegistration = UICollectionView.SupplementaryRegistration<TitleHeader>(elementKind: UICollectionView.elementKindSectionHeader) { (titleView, _, indexPath) in
-            titleView.configure(with: "Falcon Heavy", gearImage: "gearIcon")
+        let titleRegistration = UICollectionView.SupplementaryRegistration<TitleHeader>(elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (titleView, _, indexPath) in
+            guard let self = self else { return }
+            let rocket = self.rockets.first
+            titleView.configure(with: rocket)
+            titleView.isHidden = false
         }
-
+        
         let carouselRegistration = UICollectionView.CellRegistration<ParamsScrollCell, Int> { (cell, indexPath, identifier) in
             cell.contentView.backgroundColor = .darkGray
             cell.contentView.layer.cornerRadius = 25
@@ -146,7 +173,6 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             return nil
         }
         
-        // здесь добавляем секции
         var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
         snapshot.appendSections([.header, .title, .carousel, .info, .stage, .footer])
         
