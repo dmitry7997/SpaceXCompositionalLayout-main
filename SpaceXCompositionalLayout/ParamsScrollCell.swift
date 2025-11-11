@@ -58,12 +58,11 @@ extension ParamsScrollCell {
         contentView.layer.cornerRadius = 12
         contentView.layer.masksToBounds = true
         
-        let inset: CGFloat = 5
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: inset),
-            stack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -inset),
-            stack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: inset),
-            stack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -inset)
+            stack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            stack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            stack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            stack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8)
         ])
     }
     

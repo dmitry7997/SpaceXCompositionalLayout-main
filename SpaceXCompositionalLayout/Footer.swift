@@ -48,6 +48,7 @@ class Footer: UICollectionViewCell {
             button.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             button.heightAnchor.constraint(equalToConstant: 44),
             
+            pageControl.topAnchor.constraint(equalTo: button.bottomAnchor, constant: 20),
             pageControl.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
             pageControl.centerXAnchor.constraint(equalTo: centerXAnchor),
             pageControl.heightAnchor.constraint(equalToConstant: 20)

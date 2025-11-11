@@ -65,6 +65,10 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     
     func configureDataSource() { // здесь регаем разные типы ячеек для разных секций
         
+        let carouselCount = params.count
+        let infoCount = rocketParams.count
+        let stageCount = stagesParams.count
+        
         let headerRegistration = UICollectionView.SupplementaryRegistration<Header>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, indexPath) in
             headerView.configure(with: "falconHeavyImage")
         }
@@ -93,7 +97,8 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> { [weak self] (cell, indexPath, identifier) in
             guard let self = self else { return }
             
-            let params = self.stagesParams[identifier]
+            let index = identifier - carouselCount - infoCount
+            let params = self.stagesParams[index]
             cell.configure(
                 with: params.title,
                 engine: params.engine,
@@ -144,10 +149,16 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         // здесь добавляем секции
         var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
         snapshot.appendSections([.header, .title, .carousel, .info, .stage, .footer])
-        let carouselItems: [Int] = Array(0..<params.count)
+        
+        let carouselItems: [Int] = Array(0..<carouselCount)
         snapshot.appendItems(carouselItems, toSection: .carousel)
-        snapshot.appendItems([0], toSection: .info) // при добавлении секции перестает работать скрол в карсуели и теряется один элемент из нее
-        snapshot.appendItems(Array(0..<stagesParams.count), toSection: .stage)
+        
+        let infoItems: [Int] = Array(6..<carouselCount + infoCount) // этот "костыль" из "6" нужно как-то пофиксить
+        snapshot.appendItems(infoItems, toSection: .info)
+        
+        let stageItems: [Int] = Array(carouselCount + infoCount..<carouselCount + infoCount + stageCount)
+        snapshot.appendItems(stageItems,toSection: .stage)
+        
         dataSource.apply(snapshot)
     }
     
