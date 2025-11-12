@@ -68,9 +68,15 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         
         service.getItemData { [weak self] result in
             guard let self = self else { return }
+            
             switch result {
             case .success(let items):
                 self.rockets = items
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+                               
             case .failure(let error):
                 print("\(error.localizedDescription)")
             }

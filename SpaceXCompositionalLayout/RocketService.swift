@@ -46,11 +46,11 @@ final class RocketService: RocketServiceProtocol {
             do{
                 let decoder = JSONDecoder()
                 decoder.keyDecodingStrategy = .convertFromSnakeCase
-                let response = try decoder.decode(RoclerItemsResponse.self, from: data)
-                let items = response.rocketItems
+                let response = try decoder.decode([Rocket].self, from: data)
+                //let items = response.rocketItems
                 
                 DispatchQueue.main.async {
-                    completion(.success(items))
+                    completion(.success(response))
                 }
             } catch {
                 DispatchQueue.main.async {

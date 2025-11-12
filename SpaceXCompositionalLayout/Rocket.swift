@@ -107,6 +107,6 @@ struct Rocket: Decodable {
     }
 }
 
-struct RoclerItemsResponse: Decodable {
-    let rocketItems: [Rocket]
-}
+//struct RoclerItemsResponse: Decodable {
+//    let rocketItems: [Rocket]
+//}
