@@ -28,7 +28,6 @@ class RocketDetails: UICollectionViewCell {
     
     private let firstRocketValueLabel: UILabel = {
         let label = UILabel()
-        label.text = "7 декабря 2018"
         label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.numberOfLines = 1
@@ -57,7 +56,6 @@ class RocketDetails: UICollectionViewCell {
     
     private let countryValueLabel: UILabel = {
         let label = UILabel()
-        label.text = "США"
         label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.numberOfLines = 1
@@ -86,7 +84,6 @@ class RocketDetails: UICollectionViewCell {
     
     private let costValueLabel: UILabel = {
         let label = UILabel()
-        label.text = "$90 млн"
         label.textColor = .white
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.numberOfLines = 1
@@ -148,13 +145,9 @@ class RocketDetails: UICollectionViewCell {
         ])
     }
     
-    func configure(
-        firstLaunch: String,
-        country: String,
-        cost: String
-    ) {
-        firstRocketValueLabel.text = firstLaunch
-        countryValueLabel.text = country
-        costValueLabel.text = cost
+    func configure(with rocket: Rocket?) {
+        firstRocketValueLabel.text = rocket?.firstFlight
+        countryValueLabel.text = rocket?.country
+        costValueLabel.text = String(rocket?.costPerLaunch ?? 0)
     }
 }

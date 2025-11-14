@@ -25,7 +25,7 @@ struct Rocket: Decodable {
     
     let height: Measurement?
     let diameter: Measurement?
-    let mass: Measurement?
+    let mass: Mass?
     
     let firstStage: Stage?
     let secondStage: Stage?
@@ -41,6 +41,11 @@ struct Rocket: Decodable {
     struct Measurement: Decodable {
         let meters: Double?
         let feet: Double?
+    }
+    
+    struct Mass: Decodable {
+        let kg: Int?
+        let lb: Int?
     }
     
     struct Stage: Decodable {
@@ -107,6 +112,6 @@ struct Rocket: Decodable {
     }
 }
 
-struct RoclerItemsResponse: Decodable {
-    let rocketItems: [Rocket]
-}
+//struct RoclerItemsResponse: Decodable {
+//    let rocketItems: [Rocket]
+//}

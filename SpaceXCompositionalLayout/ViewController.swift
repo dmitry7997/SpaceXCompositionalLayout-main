@@ -9,13 +9,27 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     
     enum Section {
         case header
-        case title //  для названия и настроек
-        case carousel // для горизонтального скрола
-        case info // for info
-        case stage // для ступеней
+        case title
+        case carousel
+        case info
+        case stage
         case footer
     }
     
+    private let service: RocketService
+    
+    init(rocketService: RocketService) {
+        self.service = rocketService
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        self.service = RocketService()
+        super.init(coder: coder)
+    }
+    
+    private var rockets: [Rocket] = []
+
     var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
     var collectionView: UICollectionView! = nil
     
@@ -51,6 +65,22 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         super.viewDidLoad()
         configureHierarchy()
         configureDataSource()
+        
+        service.getItemData { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let items):
+                self.rockets = items
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+                               
+            case .failure(let error):
+                print("\(error.localizedDescription)")
+            }
+        }
     }
     
     func configureHierarchy() {
@@ -63,48 +93,67 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         collectionView.delegate = self
     }
     
-    func configureDataSource() { // здесь регаем разные типы ячеек для разных секций
+    func configureDataSource() {
         
         let carouselCount = params.count
         let infoCount = rocketParams.count
         let stageCount = stagesParams.count
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<Header>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, indexPath) in
-            headerView.configure(with: "falconHeavyImage")
+            let rocket = self.rockets.first
+            headerView.configure(with: rocket)
+            headerView.isHidden = false
         }
         
-        let titleRegistration = UICollectionView.SupplementaryRegistration<TitleHeader>(elementKind: UICollectionView.elementKindSectionHeader) { (titleView, _, indexPath) in
-            titleView.configure(with: "Falcon Heavy", gearImage: "gearIcon")
+        let titleRegistration = UICollectionView.SupplementaryRegistration<TitleHeader>(elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (titleView, _, indexPath) in
+            guard let self = self else { return }
+            let rocket = self.rockets.first
+            titleView.configure(with: rocket)
+            titleView.isHidden = false
         }
-
+        
         let carouselRegistration = UICollectionView.CellRegistration<ParamsScrollCell, Int> { (cell, indexPath, identifier) in
             cell.contentView.backgroundColor = .darkGray
             cell.contentView.layer.cornerRadius = 25
             cell.contentView.layer.masksToBounds = true
-            cell.configure(with: self.params[identifier].value, title: self.params[identifier].title)
+            
+            let rocket = self.rockets.first
+            
+            if indexPath.item == 0 {
+                cell.configure(with: String(rocket?.height?.feet ?? 0), title: "Высота")
+            } else if indexPath.item == 1 {
+                cell.configure(with: String(rocket?.diameter?.feet ?? 0), title: "Диаметр")
+            } else if indexPath.item == 2 {
+                cell.configure(with: String(rocket?.mass?.lb ?? 0), title: "Масса")
+            } else if indexPath.item == 3 { // это под вопросом
+                let leoPayload = rocket?.payloadWeights?.first(where: { $0.id == "leo" })
+                let leoValue = String(leoPayload?.lb ?? 0)
+                cell.configure(with: leoValue, title: "Leo")
+            }
+            
+            cell.isHidden = false
         }
         
         let rocketDetailsRegistration = UICollectionView.CellRegistration<RocketDetails, Int> { [weak self] (cell, indexPath, identifier) in
             guard let self = self else { return }
             
-            cell.configure(
-                firstLaunch: self.rocketParams[0].value,
-                country: self.rocketParams[1].value,
-                cost: self.rocketParams[2].value
-            )
+            let rocket = self.rockets.first
+            cell.configure(with: rocket)
+            cell.isHidden = false
         }
         
         let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> { [weak self] (cell, indexPath, identifier) in
             guard let self = self else { return }
             
-            let index = identifier - carouselCount - infoCount
-            let params = self.stagesParams[index]
-            cell.configure(
-                with: params.title,
-                engine: params.engine,
-                fuel: params.fuel,
-                burning: params.burning
-            )
+            let rocket = self.rockets.first
+            
+            if indexPath.item == 0 {
+                cell.configure(with: rocket?.firstStage, stageType: "ПЕРВАЯ СТУПЕНЬ")
+            } else if indexPath.item == 1 {
+                cell.configure(with: rocket?.secondStage, stageType: "ВТОРАЯ СТУПЕНЬ")
+            }
+            
+            cell.isHidden = false
         }
         
         let footerRegistration = UICollectionView.SupplementaryRegistration<Footer>(elementKind: UICollectionView.elementKindSectionHeader) { (footerView, _, indexPath) in
@@ -146,7 +195,6 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             return nil
         }
         
-        // здесь добавляем секции
         var snapshot = NSDiffableDataSourceSnapshot<Section, Int>()
         snapshot.appendSections([.header, .title, .carousel, .info, .stage, .footer])
         

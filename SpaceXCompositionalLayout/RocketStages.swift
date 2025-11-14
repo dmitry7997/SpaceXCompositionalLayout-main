@@ -11,7 +11,6 @@ class RocketStages: UICollectionViewCell {
             let label = UILabel()
             label.textColor = .white
             label.textAlignment = .left
-            label.text = "ПЕРВАЯ СТУПЕНЬ"
             label.font = .systemFont(ofSize: 18, weight: .bold)
             label.numberOfLines = 1
             return label
@@ -68,7 +67,6 @@ class RocketStages: UICollectionViewCell {
         
         private let engineValueLabel: UILabel = {
             let label = UILabel()
-            label.text = "9"
             label.textColor = .white
             label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
             label.numberOfLines = 1
@@ -78,7 +76,6 @@ class RocketStages: UICollectionViewCell {
         
         private let fuelValueLabel: UILabel = {
             let label = UILabel()
-            label.text = "385"
             label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
             label.textColor = .white
             label.numberOfLines = 1
@@ -88,7 +85,6 @@ class RocketStages: UICollectionViewCell {
         
         private let burningValueLabel: UILabel = {
             let label = UILabel()
-            label.text = "1"
             label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
             label.textColor = .white
             label.numberOfLines = 1
@@ -167,10 +163,10 @@ class RocketStages: UICollectionViewCell {
         ])
     }
     
-    public func configure(with title: String, engine: String, fuel: String, burning: String) {
-        titleLabel.text = title
-        engineValueLabel.text = engine
-        fuelValueLabel.text = fuel
-        burningValueLabel.text = burning
+    public func configure(with stage: Rocket.Stage?, stageType: String) {
+        titleLabel.text = stageType
+        engineValueLabel.text = String(stage?.engines ?? 0)
+        fuelValueLabel.text = String(stage?.fuelAmountTons ?? 0)
+        burningValueLabel.text = String(stage?.burnTimeSec ?? 0)
     }
 }

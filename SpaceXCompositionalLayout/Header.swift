@@ -34,7 +34,33 @@ class Header: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with imageName: String) {
-        imageView.image = UIImage(named: imageName)
+    func configure(with rocket: Rocket?) {
+        guard let imageUrlString = rocket?.flickrImages?.first,
+              let imageUrl = URL(string: imageUrlString) else {
+            return
+        }
+        let task = URLSession.shared.dataTask(with: imageUrl) { [weak self] data, response, error in
+            
+            guard let self else { return }
+            
+            if let error = error {
+                print("\(error.localizedDescription)")
+                return
+            }
+            
+            guard let data else {
+                print("\(String(describing: error?.localizedDescription))")
+                return
+            }
+            
+            if let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    self.imageView.image = image
+                }
+            } else {
+                print("\(String(describing: error?.localizedDescription))")
+            }
+        }
+        task.resume()
     }
 }
