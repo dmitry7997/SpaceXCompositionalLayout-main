@@ -100,7 +100,9 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         let stageCount = stagesParams.count
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<Header>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, indexPath) in
-            headerView.configure(with: "falconHeavyImage")
+            let rocket = self.rockets.first
+            headerView.configure(with: rocket)
+            headerView.isHidden = false
         }
         
         let titleRegistration = UICollectionView.SupplementaryRegistration<TitleHeader>(elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (titleView, _, indexPath) in
@@ -114,30 +116,44 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             cell.contentView.backgroundColor = .darkGray
             cell.contentView.layer.cornerRadius = 25
             cell.contentView.layer.masksToBounds = true
-            cell.configure(with: self.params[identifier].value, title: self.params[identifier].title)
+            
+            let rocket = self.rockets.first
+            
+            if indexPath.item == 0 {
+                cell.configure(with: String(rocket?.height?.feet ?? 0), title: "Высота")
+            } else if indexPath.item == 1 {
+                cell.configure(with: String(rocket?.diameter?.feet ?? 0), title: "Диаметр")
+            } else if indexPath.item == 2 {
+                cell.configure(with: String(rocket?.mass?.lb ?? 0), title: "Масса")
+            } else if indexPath.item == 3 { // это под вопросом
+                let leoPayload = rocket?.payloadWeights?.first(where: { $0.id == "leo" })
+                let leoValue = String(leoPayload?.lb ?? 0)
+                cell.configure(with: leoValue, title: "Leo")
+            }
+            
+            cell.isHidden = false
         }
         
         let rocketDetailsRegistration = UICollectionView.CellRegistration<RocketDetails, Int> { [weak self] (cell, indexPath, identifier) in
             guard let self = self else { return }
             
-            cell.configure(
-                firstLaunch: self.rocketParams[0].value,
-                country: self.rocketParams[1].value,
-                cost: self.rocketParams[2].value
-            )
+            let rocket = self.rockets.first
+            cell.configure(with: rocket)
+            cell.isHidden = false
         }
         
         let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> { [weak self] (cell, indexPath, identifier) in
             guard let self = self else { return }
             
-            let index = identifier - carouselCount - infoCount
-            let params = self.stagesParams[index]
-            cell.configure(
-                with: params.title,
-                engine: params.engine,
-                fuel: params.fuel,
-                burning: params.burning
-            )
+            let rocket = self.rockets.first
+            
+            if indexPath.item == 0 {
+                cell.configure(with: rocket?.firstStage, stageType: "ПЕРВАЯ СТУПЕНЬ")
+            } else if indexPath.item == 1 {
+                cell.configure(with: rocket?.secondStage, stageType: "ВТОРАЯ СТУПЕНЬ")
+            }
+            
+            cell.isHidden = false
         }
         
         let footerRegistration = UICollectionView.SupplementaryRegistration<Footer>(elementKind: UICollectionView.elementKindSectionHeader) { (footerView, _, indexPath) in
