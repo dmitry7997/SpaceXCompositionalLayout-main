@@ -33,34 +33,6 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
     var collectionView: UICollectionView! = nil
     
-    let params: [(value: String, title: String)] = [
-        ("229", "Высота"),
-        ("39.9", "Диаметр"),
-        ("1,322,575", "Масса"),
-        ("100", "Leo")
-    ]
-    
-    let rocketParams: [(value: String, title: String)] = [
-        ("7 февраля 2018", "Первый запуск"),
-        ("США", "Страна"),
-        ("$90 млн", "Стоимость запуска")
-    ]
-    
-    let stagesParams: [(title: String, engine: String, fuel: String, burning: String)] = [
-        (
-            title: "ПЕРВАЯ СТУПЕНЬ",
-            engine: "9",
-            fuel: "385",
-            burning: "1"
-        ),
-        (
-            title: "ВТОРАЯ СТУПЕНЬ",
-            engine: "1",
-            fuel: "107",
-            burning: "397"
-        )
-    ]
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
@@ -94,10 +66,10 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     }
     
     func configureDataSource() {
-        
-        let carouselCount = params.count
-        let infoCount = rocketParams.count
-        let stageCount = stagesParams.count
+        // или лучше вынести из функций регистраций инфу, поместить ее в массивы и уже исходя из размеров массивов использовать счетчик в снепшотах вместо этих костылей?
+        let carouselCount = 4
+        let infoCount = 3
+        let stageCount = 2
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<Header>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, indexPath) in
             let rocket = self.rockets.first
