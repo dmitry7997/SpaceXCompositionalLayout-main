@@ -26,6 +26,20 @@ class Footer: UICollectionViewCell {
         return button
     }()
     
+    var currentPage: Int = 0 {
+        didSet {
+            pageControl.currentPage = currentPage
+        }
+    }
+    
+    var totalPages: Int = 4 {
+        didSet {
+            pageControl.numberOfPages = totalPages
+        }
+    }
+    
+    var onPageChange: ((Int) -> Void)?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -57,7 +71,13 @@ class Footer: UICollectionViewCell {
         self.backgroundColor = .black
     }
     
-    func configure() {
-        
+    func configure(currentPage: Int, totalPages: Int, onPageChange: @escaping (Int) -> Void) {
+        self.currentPage = currentPage
+        self.totalPages = totalPages
+        self.onPageChange = onPageChange
+    }
+    
+    @objc private func pageControlChanged(_ sender: UIPageControl) {
+        onPageChange?(sender.currentPage)
     }
 }

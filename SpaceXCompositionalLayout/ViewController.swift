@@ -29,6 +29,8 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     }
     
     private var rockets: [Rocket] = []
+    
+    var selectedRocketIndex: Int = 0
 
     var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
     var collectionView: UICollectionView! = nil
@@ -53,6 +55,14 @@ class ViewController: UIViewController, UICollectionViewDelegate {
                 print("\(error.localizedDescription)")
             }
         }
+        
+        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(swipeToNextRocket))
+        swipeLeft.direction = .left
+        collectionView.addGestureRecognizer(swipeLeft)
+
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(swipeToPreviousRocket))
+        swipeRight.direction = .right
+        collectionView.addGestureRecognizer(swipeRight)
     }
     
     func configureHierarchy() {
@@ -66,20 +76,18 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     }
     
     func configureDataSource() {
-        // или лучше вынести из функций регистраций инфу, поместить ее в массивы и уже исходя из размеров массивов использовать счетчик в снепшотах вместо этих костылей?
+        let rocket = selectedRocketIndex < rockets.count ? rockets[selectedRocketIndex] : nil
+
         let carouselCount = 4
         let infoCount = 3
         let stageCount = 2
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<Header>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, indexPath) in
-            let rocket = self.rockets.first
             headerView.configure(with: rocket)
             headerView.isHidden = false
         }
         
-        let titleRegistration = UICollectionView.SupplementaryRegistration<TitleHeader>(elementKind: UICollectionView.elementKindSectionHeader) { [weak self] (titleView, _, indexPath) in
-            guard let self = self else { return }
-            let rocket = self.rockets.first
+        let titleRegistration = UICollectionView.SupplementaryRegistration<TitleHeader>(elementKind: UICollectionView.elementKindSectionHeader) { (titleView, _, indexPath) in
             titleView.configure(with: rocket)
             titleView.isHidden = false
         }
@@ -88,8 +96,6 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             cell.contentView.backgroundColor = .darkGray
             cell.contentView.layer.cornerRadius = 25
             cell.contentView.layer.masksToBounds = true
-            
-            let rocket = self.rockets.first
             
             if indexPath.item == 0 {
                 cell.configure(with: String(rocket?.height?.feet ?? 0), title: "Высота")
@@ -106,18 +112,14 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             cell.isHidden = false
         }
         
-        let rocketDetailsRegistration = UICollectionView.CellRegistration<RocketDetails, Int> { [weak self] (cell, indexPath, identifier) in
-            guard let self = self else { return }
-            
-            let rocket = self.rockets.first
+        let rocketDetailsRegistration = UICollectionView.CellRegistration<RocketDetails, Int> {
+            (cell, indexPath, identifier) in
             cell.configure(with: rocket)
             cell.isHidden = false
         }
         
-        let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> { [weak self] (cell, indexPath, identifier) in
-            guard let self = self else { return }
-            
-            let rocket = self.rockets.first
+        let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> {
+            (cell, indexPath, identifier) in
             
             if indexPath.item == 0 {
                 cell.configure(with: rocket?.firstStage, stageType: "ПЕРВАЯ СТУПЕНЬ")
@@ -129,7 +131,15 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         }
         
         let footerRegistration = UICollectionView.SupplementaryRegistration<Footer>(elementKind: UICollectionView.elementKindSectionHeader) { (footerView, _, indexPath) in
-            footerView.configure()
+            
+            footerView.configure(
+                currentPage: self.selectedRocketIndex,
+                totalPages: self.rockets.count,
+                onPageChange: { [weak self] newPage in
+                    self?.selectedRocketIndex = newPage
+                    self?.configureDataSource()
+                }
+            )
         }
         
         dataSource = UICollectionViewDiffableDataSource<Section, Int>(collectionView: collectionView) { collectionView, indexPath, itemID in
@@ -255,4 +265,18 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         }
         return layout
     }
+    
+   @objc func swipeToNextRocket() {
+       if selectedRocketIndex < rockets.count - 1 {
+           selectedRocketIndex += 1
+           configureDataSource()
+       }
+   }
+
+    @objc func swipeToPreviousRocket() {
+       if selectedRocketIndex > 0 {
+           selectedRocketIndex -= 1
+           configureDataSource()
+       }
+   }
 }
