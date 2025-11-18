@@ -3,7 +3,6 @@
 //  SpaceXCompositionalLayout
 //
 
-import Foundation
 import UIKit
 
 class TitleHeader: UICollectionReusableView {
@@ -51,8 +50,11 @@ class TitleHeader: UICollectionReusableView {
         ])
     }
     
-    func configure(with title: String, gearImage: String) {
-        rocketNameLabel.text = title
-        //gearIcon.image = UIImage(named: gearImage)
-    }
+    func configure(with rocket: Rocket?) {
+            if let name = rocket?.name, !name.isEmpty {
+                rocketNameLabel.text = name
+            } else {
+                rocketNameLabel.text = "Rocket"
+            }
+        }
 }
