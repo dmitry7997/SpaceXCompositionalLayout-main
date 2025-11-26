@@ -17,13 +17,16 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     }
     
     private let service: RocketService
+    private let imageService: ImageService
     
-    init(rocketService: RocketService) {
+    init(rocketService: RocketService, imageService: ImageService) {
+        self.imageService = imageService
         self.service = rocketService
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
+        self.imageService = ImageService()
         self.service = RocketService()
         super.init(coder: coder)
     }
@@ -77,13 +80,28 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     
     func configureDataSource() {
         let rocket = selectedRocketIndex < rockets.count ? rockets[selectedRocketIndex] : nil
+        
+        let carouselData: [(value: String, title: String)] = [
+            (String(rocket?.height?.feet ?? 0), "Высота"),
+            (String(rocket?.diameter?.feet ?? 0), "Диаметр"),
+            (String(rocket?.mass?.lb ?? 0), "Масса"),
+            {
+                let leoPayload = rocket?.payloadWeights?.first(where: { $0.id == "leo" })
+                return (String(leoPayload?.lb ?? 0), "Leo")
+            }()
+        ]
+        
+        let stageData: [(stage: Rocket.Stage?, title: String)] = [
+            (stage: rocket?.firstStage, title: "ПЕРВАЯ СТУПЕНЬ"),
+            (stage: rocket?.secondStage, title: "ВТОРАЯ СТУПЕНЬ")
+        ]
 
         let carouselCount = 4
         let infoCount = 3
         let stageCount = 2
         
         let headerRegistration = UICollectionView.SupplementaryRegistration<Header>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, indexPath) in
-            headerView.configure(with: rocket)
+            headerView.configure(with: rocket, imageService: self.imageService)
             headerView.isHidden = false
         }
         
@@ -97,17 +115,8 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             cell.contentView.layer.cornerRadius = 25
             cell.contentView.layer.masksToBounds = true
             
-            if indexPath.item == 0 {
-                cell.configure(with: String(rocket?.height?.feet ?? 0), title: "Высота")
-            } else if indexPath.item == 1 {
-                cell.configure(with: String(rocket?.diameter?.feet ?? 0), title: "Диаметр")
-            } else if indexPath.item == 2 {
-                cell.configure(with: String(rocket?.mass?.lb ?? 0), title: "Масса")
-            } else if indexPath.item == 3 { // это под вопросом
-                let leoPayload = rocket?.payloadWeights?.first(where: { $0.id == "leo" })
-                let leoValue = String(leoPayload?.lb ?? 0)
-                cell.configure(with: leoValue, title: "Leo")
-            }
+            let data = carouselData[indexPath.item]
+            cell.configure(with: data.value, title: data.title)
             
             cell.isHidden = false
         }
@@ -121,11 +130,8 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> {
             (cell, indexPath, identifier) in
             
-            if indexPath.item == 0 {
-                cell.configure(with: rocket?.firstStage, stageType: "ПЕРВАЯ СТУПЕНЬ")
-            } else if indexPath.item == 1 {
-                cell.configure(with: rocket?.secondStage, stageType: "ВТОРАЯ СТУПЕНЬ")
-            }
+            let data = stageData[indexPath.item]
+            cell.configure(with: data.stage, stageType: data.title)
             
             cell.isHidden = false
         }
