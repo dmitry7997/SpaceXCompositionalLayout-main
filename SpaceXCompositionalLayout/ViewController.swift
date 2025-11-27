@@ -18,23 +18,24 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     
     private let service: RocketService
     private let imageService: ImageService
+    private let rocketViewModel: RocketViewModel
     
-    init(rocketService: RocketService, imageService: ImageService) {
+    init(rocketService: RocketService, imageService: ImageService, rocketViewModel: RocketViewModel) {
         self.imageService = imageService
         self.service = rocketService
+        self.rocketViewModel = rocketViewModel
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         self.imageService = ImageService()
         self.service = RocketService()
+        self.rocketViewModel = RocketViewModel(service: service)
         super.init(coder: coder)
     }
     
     private var rockets: [Rocket] = []
     
-    var selectedRocketIndex: Int = 0
-
     var dataSource: UICollectionViewDiffableDataSource<Section, Int>! = nil
     var collectionView: UICollectionView! = nil
     
@@ -43,19 +44,17 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         configureHierarchy()
         configureDataSource()
         
-        service.getItemData { [weak self] result in
+        rocketViewModel.loadRockets { [weak self] result in
             guard let self = self else { return }
             
-            switch result {
-            case .success(let items):
-                self.rockets = items
-                
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.configureDataSource()
+                    
+                case .failure(let error):
+                    print("\(error.localizedDescription)")
                 }
-                               
-            case .failure(let error):
-                print("\(error.localizedDescription)")
             }
         }
         
@@ -79,22 +78,7 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     }
     
     func configureDataSource() {
-        let rocket = selectedRocketIndex < rockets.count ? rockets[selectedRocketIndex] : nil
-        
-        let carouselData: [(value: String, title: String)] = [
-            (String(rocket?.height?.feet ?? 0), "Высота"),
-            (String(rocket?.diameter?.feet ?? 0), "Диаметр"),
-            (String(rocket?.mass?.lb ?? 0), "Масса"),
-            {
-                let leoPayload = rocket?.payloadWeights?.first(where: { $0.id == "leo" })
-                return (String(leoPayload?.lb ?? 0), "Leo")
-            }()
-        ]
-        
-        let stageData: [(stage: Rocket.Stage?, title: String)] = [
-            (stage: rocket?.firstStage, title: "ПЕРВАЯ СТУПЕНЬ"),
-            (stage: rocket?.secondStage, title: "ВТОРАЯ СТУПЕНЬ")
-        ]
+        let rocket = rocketViewModel.currentRocket
 
         let carouselCount = 4
         let infoCount = 3
@@ -115,9 +99,11 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             cell.contentView.layer.cornerRadius = 25
             cell.contentView.layer.masksToBounds = true
             
-            let data = carouselData[indexPath.item]
-            cell.configure(with: data.value, title: data.title)
-            
+            let data = self.rocketViewModel.carouselData
+            if indexPath.item < data.count {
+                let itemData = data[indexPath.item]
+                cell.configure(with: itemData.value, title: itemData.title)
+            }
             cell.isHidden = false
         }
         
@@ -127,22 +113,22 @@ class ViewController: UIViewController, UICollectionViewDelegate {
             cell.isHidden = false
         }
         
-        let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> {
-            (cell, indexPath, identifier) in
-            
-            let data = stageData[indexPath.item]
-            cell.configure(with: data.stage, stageType: data.title)
-            
+        let stagesRegistration = UICollectionView.CellRegistration<RocketStages, Int> { (cell, indexPath, identifier) in
+            let data = self.rocketViewModel.stageData
+            if indexPath.item < data.count {
+                let itemData = data[indexPath.item]
+                cell.configure(with: itemData.stage, stageType: itemData.title)
+            }
             cell.isHidden = false
         }
         
         let footerRegistration = UICollectionView.SupplementaryRegistration<Footer>(elementKind: UICollectionView.elementKindSectionHeader) { (footerView, _, indexPath) in
             
             footerView.configure(
-                currentPage: self.selectedRocketIndex,
-                totalPages: self.rockets.count,
+                currentPage: self.rocketViewModel.currentPage,
+                totalPages: self.rocketViewModel.totalRockets,
                 onPageChange: { [weak self] newPage in
-                    self?.selectedRocketIndex = newPage
+                    self?.rocketViewModel.selectRocket(at: newPage)
                     self?.configureDataSource()
                 }
             )
@@ -272,17 +258,13 @@ class ViewController: UIViewController, UICollectionViewDelegate {
         return layout
     }
     
-   @objc func swipeToNextRocket() {
-       if selectedRocketIndex < rockets.count - 1 {
-           selectedRocketIndex += 1
-           configureDataSource()
-       }
-   }
-
+    @objc func swipeToNextRocket() {
+        rocketViewModel.selectNextRocket()
+        configureDataSource()
+    }
+    
     @objc func swipeToPreviousRocket() {
-       if selectedRocketIndex > 0 {
-           selectedRocketIndex -= 1
-           configureDataSource()
-       }
-   }
+        rocketViewModel.selectPreviousRocket()
+        configureDataSource()
+    }
 }
