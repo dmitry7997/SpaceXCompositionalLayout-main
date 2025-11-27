@@ -15,6 +15,8 @@ class Header: UICollectionViewCell {
         return iv
     }()
     
+    private var imageService: ImageService?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -34,33 +36,23 @@ class Header: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with rocket: Rocket?) {
+    func configure(with rocket: Rocket?, imageService: ImageService) {
+        self.imageService = imageService
+        
         guard let imageUrlString = rocket?.flickrImages?.first,
               let imageUrl = URL(string: imageUrlString) else {
             return
         }
-        let task = URLSession.shared.dataTask(with: imageUrl) { [weak self] data, response, error in
+        
+        imageService.loadImage(from: imageUrl) { [weak self] result in
+            guard let self = self else { return }
             
-            guard let self else { return }
-            
-            if let error = error {
-                print("\(error.localizedDescription)")
-                return
-            }
-            
-            guard let data else {
-                print("\(String(describing: error?.localizedDescription))")
-                return
-            }
-            
-            if let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    self.imageView.image = image
-                }
-            } else {
-                print("\(String(describing: error?.localizedDescription))")
+            switch result {
+            case .success(let image):
+                self.imageView.image = image
+            case .failure(let error):
+                print("\(String(describing: error.localizedDescription))")
             }
         }
-        task.resume()
     }
 }
