@@ -39,6 +39,7 @@ class Footer: UICollectionViewCell {
     }
     
     var onPageChange: ((Int) -> Void)?
+    var onButtonTap: (() -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,15 +70,22 @@ class Footer: UICollectionViewCell {
         ])
         
         self.backgroundColor = .black
+        
+        button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
-    func configure(currentPage: Int, totalPages: Int, onPageChange: @escaping (Int) -> Void) {
+    func configure(currentPage: Int, totalPages: Int, onPageChange: @escaping (Int) -> Void, onButtonTap: @escaping () -> Void) {
         self.currentPage = currentPage
         self.totalPages = totalPages
         self.onPageChange = onPageChange
+        self.onButtonTap = onButtonTap
     }
     
     @objc private func pageControlChanged(_ sender: UIPageControl) {
         onPageChange?(sender.currentPage)
+    }
+    
+    @objc private func buttonTapped() {
+        onButtonTap?()
     }
 }
