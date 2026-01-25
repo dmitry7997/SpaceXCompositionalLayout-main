@@ -130,6 +130,9 @@ class ViewController: UIViewController, UICollectionViewDelegate {
                 onPageChange: { [weak self] newPage in
                     self?.rocketViewModel.selectRocket(at: newPage)
                     self?.configureDataSource()
+                },
+                onButtonTap: { [weak self] in
+                    self?.openLaunchViewController()
                 }
             )
         }
@@ -266,5 +269,10 @@ class ViewController: UIViewController, UICollectionViewDelegate {
     @objc func swipeToPreviousRocket() {
         rocketViewModel.selectPreviousRocket()
         configureDataSource()
+    }
+    
+    private func openLaunchViewController() {
+        let launchVC = LaunchViewController()
+        present(launchVC, animated: true)
     }
 }
