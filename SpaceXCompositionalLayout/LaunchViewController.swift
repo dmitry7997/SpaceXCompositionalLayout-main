@@ -50,9 +50,7 @@ class LaunchViewController: UIViewController {
             switch result {
             case .success(let launches):
                 self?.launches = launches
-                DispatchQueue.main.async {
-                    self?.tableView.reloadData()
-               }
+                self?.tableView.reloadData()
             case .failure(let error):
                 print("Loading error: \(error.localizedDescription)")
             }
@@ -82,7 +80,7 @@ extension LaunchViewController: UITableViewDelegate, UITableViewDataSource {
             withIdentifier: LaunchTableViewCell.identifier,
             for: indexPath
         ) as? LaunchTableViewCell else {
-            fatalError("The TableView could not dequeue a LaunchTableViewCell")
+            return UITableViewCell()
         }
         let launch = launches[indexPath.row]
         cell.configure(with: launch)

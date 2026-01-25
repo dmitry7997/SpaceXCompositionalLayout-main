@@ -7,11 +7,11 @@
 
 import UIKit
 
-class LaunchTableViewCell: UITableViewCell {
+final class LaunchTableViewCell: UITableViewCell {
 
     static let identifier = "ItemCell"
     
-    private let myImageView: UIImageView = {
+    private lazy var myImageView: UIImageView = {
         let iv = UIImageView()
         iv.contentMode = .scaleAspectFit
         iv.tintColor = .label
